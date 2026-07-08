@@ -9,3 +9,8 @@ reports/
 .DS_Store
 .agents/
 .mimocode/
+.venv/
+pyproject.toml
+.python-version
+uv.lock
+docs/Hackathon docs/*

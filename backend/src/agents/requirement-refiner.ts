@@ -1,44 +1,8 @@
 import type { AgentState, Requirement, TestCase } from './state.js';
-import { getLangfuse } from '../langfuse.js';
-
-const AZURE_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT!;
-const AZURE_KEY = process.env.AZURE_OPENAI_API_KEY!;
-const AZURE_VERSION = process.env.AZURE_OPENAI_API_VERSION || '2025-04-01-preview';
-
-async function callLLM(prompt: string, traceId?: string): Promise<string> {
-  const langfuse = getLangfuse();
-  const span = langfuse?.trace({ id: traceId, name: 'RequirementRefiner-LLM' })?.span({ name: 'callLLM' });
-
-  const url = `${AZURE_ENDPOINT}/chat/completions?api-version=${AZURE_VERSION}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': AZURE_KEY,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    span?.end({ statusMessage: `Error: ${res.status}` });
-    throw new Error(`LLM API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json() as { choices: { message: { content: string } }[] };
-  const content = data.choices[0].message.content;
-
-  span?.end({ output: { model: 'gpt-4o', tokens: content.length } });
-  return content;
-}
+import { callLLM, callEmbeddings } from '../llm-client.js';
 
 export async function requirementRefiner(state: AgentState): Promise<Partial<AgentState>> {
   console.log('[RequirementRefiner] Processing documents...');
-  const traceId = state.traceId;
 
   // Parse requirements
   const reqDocs = state.documents.filter(d =>
@@ -70,7 +34,7 @@ ${combinedContent}`;
     console.log('[RequirementRefiner] Calling LLM to structure requirements...');
 
     try {
-      const response = await callLLM(prompt, traceId);
+      const response = await callLLM(prompt);
       const jsonMatch = response.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
         throw new Error('No JSON array found in LLM response');
@@ -94,7 +58,19 @@ ${combinedContent}`;
   }
 
   console.log(`[RequirementRefiner] Found ${requirements.length} requirements, ${testCases.length} test cases`);
-  return { requirements, testCases };
+
+  // Compute embeddings for requirements
+  const requirementEmbeddings: Record<string, number[]> = {};
+  for (const req of requirements) {
+    try {
+      requirementEmbeddings[req.id] = await callEmbeddings(req.text);
+    } catch (e) {
+      console.warn(`[RequirementRefiner] Embedding failed for ${req.id}, will use fallback matching:`, e);
+    }
+  }
+  console.log(`[RequirementRefiner] Computed ${Object.keys(requirementEmbeddings).length}/${requirements.length} requirement embeddings`);
+
+  return { requirements, testCases, requirementEmbeddings };
 }
 
 function parseRequirementsFallback(content: string): Requirement[] {

@@ -17,7 +17,8 @@ export async function reportGenerator(state: AgentState): Promise<Partial<AgentS
   }
 
   const html = renderReport(state);
-  const reportPath = join(REPORTS_DIR, `${state.runId}.pdf`);
+  const dateStr = new Date().toISOString().split('T')[0];
+  const reportPath = join(REPORTS_DIR, `PDLC-Coverage-Report-${dateStr}.pdf`);
 
   try {
     const puppeteer = await import('puppeteer');
@@ -83,7 +84,7 @@ function renderReport(state: AgentState): string {
 <body>
   <div class="header">
     <h1>PDLC Coverage Report</h1>
-    <p>Generated on ${date} | Run ID: ${state.runId}</p>
+    <p>Generated on ${date}</p>
   </div>
 
   <h2>Executive Summary</h2>
@@ -159,8 +160,7 @@ function renderReport(state: AgentState): string {
   </table>
 
   <div class="footer">
-    <p>PDLC Hackathon — Requirements Traceability & Coverage Analysis</p>
-    <p>Powered by LangGraph.js + Puppeteer</p>
+    <p>Generated on ${date}</p>
   </div>
 </body>
 </html>`;

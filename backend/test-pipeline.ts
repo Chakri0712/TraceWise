@@ -1,7 +1,10 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import dotenv from 'dotenv';
 import { graph } from './src/agents/graph.js';
 import type { AgentState } from './src/agents/state.js';
+
+dotenv.config();
 
 async function main() {
   const reqContent = readFileSync(join(import.meta.dirname, 'sample/requirements.md'), 'utf-8');
@@ -16,6 +19,8 @@ async function main() {
     requirements: [],
     testCases: [],
     generatedTestCases: [],
+    requirementEmbeddings: {},
+    testCaseEmbeddings: {},
     matches: [],
     gaps: [],
     coverage: 0,

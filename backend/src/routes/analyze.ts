@@ -38,6 +38,8 @@ router.post('/:runId', async (req, res) => {
       requirements: [],
       testCases: [],
       generatedTestCases: [],
+      requirementEmbeddings: {},
+      testCaseEmbeddings: {},
       matches: [],
       gaps: [],
       coverage: 0,
@@ -52,6 +54,13 @@ router.post('/:runId', async (req, res) => {
         status: 'completed',
         coverage: result.coverage,
         gaps: JSON.stringify(result.gaps),
+        results: JSON.stringify({
+          requirements: result.requirements,
+          testCases: result.testCases,
+          generatedTestCases: result.generatedTestCases,
+          matches: result.matches,
+          reportPath: result.reportPath,
+        }),
       },
     });
 

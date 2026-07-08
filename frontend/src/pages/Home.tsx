@@ -1,14 +1,12 @@
-'use client';
-
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -58,7 +56,7 @@ export default function Home() {
 
       const data = await res.json();
       if (data.runId) {
-        router.push(`/dashboard?runId=${data.runId}`);
+        navigate(`/dashboard?runId=${data.runId}`);
       }
     } catch (e) {
       console.error('Upload failed:', e);

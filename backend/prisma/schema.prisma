@@ -12,6 +12,7 @@ model Run {
   status      String   @default("pending")
   coverage    Float?
   gaps        String?
+  results     String?
   createdAt   DateTime @default(now())
   documents   Document[]
 }

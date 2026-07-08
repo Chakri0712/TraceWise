@@ -18,11 +18,18 @@ router.get('/:runId', async (req, res) => {
       return;
     }
 
+    const results = run.results ? JSON.parse(run.results) : {};
+
     res.json({
       runId: run.id,
       status: run.status,
       coverage: run.coverage,
       gaps: run.gaps ? JSON.parse(run.gaps) : [],
+      requirements: results.requirements || [],
+      testCases: results.testCases || [],
+      generatedTestCases: results.generatedTestCases || [],
+      matches: results.matches || [],
+      reportPath: results.reportPath || null,
       createdAt: run.createdAt,
     });
   } catch (e) {

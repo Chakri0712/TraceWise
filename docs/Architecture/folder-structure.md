@@ -4,7 +4,6 @@
 PDLC Sample/
 ├── package.json                    # Root workspace config (npm workspaces)
 ├── .gitignore                      # Excludes node_modules, .env, *.db, reports/
-├── architecture_setup.md           # Original architecture design document
 ├── pdlc-implementation.md          # Implementation task plan (all tasks checked)
 │
 ├── tasks/                          # Task documentation
@@ -17,18 +16,24 @@ PDLC Sample/
 │   ├── task-7.md                   # File upload + parsers
 │   ├── task-8.md                   # Analyze endpoint + ReportGenerator
 │   ├── task-9.md                   # Report download + results
-│   ├── task-10.md                  # Next.js dashboard
+│   ├── task-10.md                  # Vite dashboard
 │   └── task-11.md                  # Langfuse observability
 │
 ├── docs/                           # User documentation
+│   ├── ARCHITECTURE.md             # Current end-to-end flow and architecture
 │   ├── user-setup.md               # Prerequisites & configuration
+│   ├── testing-guide.md            # Manual testing walkthrough
 │   ├── folder-structure.md         # This file
-│   └── testing-guide.md            # Manual testing walkthrough
+│   └── architecture-setup-ARCHIVED.md  # Archived pre-implementation design doc
+│
+├── planning docs/                  # Historical planning documents
+│   └── README.md                   # Index explaining these are archived
 │
 ├── backend/                        # Node.js Express backend
 │   ├── package.json                # Backend dependencies & scripts
 │   ├── tsconfig.json               # TypeScript config (ES2022, NodeNext)
 │   ├── .env                        # Environment variables (API keys, DB URL)
+│   ├── .env.example                # Template for environment variables
 │   │
 │   ├── prisma/
 │   │   ├── schema.prisma           # Data models (Run, Document)
@@ -36,6 +41,7 @@ PDLC Sample/
 │   │
 │   ├── src/
 │   │   ├── index.ts                # Express server entry point
+│   │   ├── llm-client.ts           # Unified LLM client (Azure APIM, OpenAI)
 │   │   ├── langfuse.ts             # Langfuse client singleton
 │   │   │
 │   │   ├── agents/                 # AI agent pipeline
@@ -57,21 +63,22 @@ PDLC Sample/
 │   ├── reports/                    # Generated PDF reports (auto-created)
 │   ├── uploads/                    # Temp upload directory (auto-cleaned)
 │   └── sample/                     # Demo data
-│       ├── requirements.md         # 4 sample requirements
-│       └── test_cases.md           # 2 sample test cases (creates gaps)
+│       ├── requirements.md         # 12 sample requirements
+│       └── test_cases.md           # 5 sample test cases (creates gaps)
 │
-└── frontend/                       # Next.js 14 frontend
+└── frontend/                       # Vite + React frontend
     ├── package.json                # Frontend dependencies & scripts
     ├── tsconfig.json               # TypeScript config (ES2017, bundler)
-    ├── next.config.js              # API proxy rewrites to localhost:3001
+    ├── vite.config.ts              # Vite config with API proxy to localhost:3001
+    ├── index.html                  # Vite entry point
     │
-    └── src/app/
-        ├── layout.tsx              # Root layout (html, body, metadata)
-        ├── page.tsx                # Upload page (drag-drop file selector)
-        ├── globals.css             # Global styles (265 lines)
+    └── src/
+        ├── main.tsx                # React root + BrowserRouter setup
+        ├── index.css               # Global styles (265 lines)
         │
-        └── dashboard/
-            └── page.tsx            # Dashboard (stats, matrix, gaps, PDF link)
+        └── pages/
+            ├── Home.tsx            # Upload page (drag-drop file selector)
+            └── Dashboard.tsx       # Dashboard (stats, matrix, gaps, PDF link)
 ```
 
 ---
@@ -83,6 +90,7 @@ PDLC Sample/
 | File | Purpose |
 |------|---------|
 | `src/index.ts` | Boots Express server, mounts routes, health endpoint |
+| `src/llm-client.ts` | Unified LLM client: Azure APIM + OpenAI-compatible providers, chat completions, embeddings |
 | `src/langfuse.ts` | Lazy-init Langfuse client; returns null if not configured |
 | `prisma/schema.prisma` | Defines Run + Document models for SQLite |
 
@@ -110,7 +118,7 @@ PDLC Sample/
 
 | File | Purpose |
 |------|---------|
-| `src/app/page.tsx` | Upload page with drag-drop, file list, upload button |
-| `src/app/dashboard/page.tsx` | Results display: stats, matrix, gaps, generated tests |
-| `src/app/globals.css` | All visual styling (responsive, color-coded status) |
-| `next.config.js` | Proxy `/api/*` requests to backend on port 3001 |
+| `src/pages/Home.tsx` | Upload page with drag-drop, file list, upload button |
+| `src/pages/Dashboard.tsx` | Results display: stats, matrix, gaps, generated tests |
+| `src/index.css` | All visual styling (responsive, color-coded status) |
+| `vite.config.ts` | Proxy `/api/*` requests to backend on port 3001 |

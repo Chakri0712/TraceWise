@@ -1,2 +1,16 @@
-- Test-1: Verify email/password login succeeds with valid credentials.
-- Test-2: Verify dashboard load time is under 2 seconds.
+# Sample Test Cases — E-Commerce Platform
+
+## Uploaded Test Cases (partial coverage)
+
+- Test-1: Verify user can register with valid email and password.
+- Test-2: Verify user can log in with Google OAuth and receive a session token.
+- Test-3: Verify product catalog displays results when filtering by category.
+- Test-4: Verify shopping cart updates quantity correctly.
+- Test-5: Verify checkout process completes with credit card payment.
+
+## Notes
+
+- These 5 test cases cover Req-1, Req-2, Req-4, Req-5, and Req-6.
+- Missing coverage: Req-3 (GitHub OAuth), Req-7 (email notifications), Req-8 (admin CRUD),
+  Req-9 (performance), Req-10 (concurrency), Req-11 (password security), Req-12 (GDPR).
+- Expected coverage after analysis: ~42% (5/12 requirements covered).

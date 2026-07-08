@@ -23,41 +23,40 @@ Build a prototype that takes requirements + test cases, generates test coverage 
   - **Verify:** `npm run dev` starts server, `npx prisma db push` creates `.db` file
 
 - [x] **3. Create Prisma schema for runs**
-  - Define `Run` model: id, status, coverage%, gaps JSON, createdAt
+  - Define `Run` model: id, status, coverage%, gaps JSON, results JSON, createdAt
   - Define `Document` model: id, filename, type, content, runId
   - Push schema to SQLite
   - **Verify:** `npx prisma studio` shows empty tables
 
 ### Phase 3: Agent Layer
-- [x] **4. Set up LangGraph.js + LangChain.js + ChromaDB**
-  - `npm install @langchain/core @langchain/community @langchain/google-genre langchain chromadb langgraph`
-  - Create `src/agents/state.ts` with shared state type
+- [x] **4. Set up LangGraph.js agent skeleton**
+  - Install `@langchain/langgraph` for state machine orchestration
+  - Create `src/agents/state.ts` with shared `AgentState` type
   - Create `src/agents/graph.ts` with 4-agent pipeline skeleton
   - **Verify:** Graph compiles, agents are callable
 
 - [x] **5. Implement RequirementRefinerAgent**
-  - Query ChromaDB for uploaded requirements
-  - Call LLM to structure requirements into JSON format
-  - Output: `{ requirements: [{ id, text, priority }] }`
+  - Read documents from agent state (uploaded via Prisma)
+  - Call LLM to parse requirements into structured JSON `{id, text, priority}`
+  - Fall back to regex parsing if LLM fails
   - **Verify:** Upload sample reqs → agent returns structured JSON
 
 - [x] **6. Implement TestCaseGeneratorAgent + TraceabilityAgent**
   - Generate test cases from requirements via LLM
-  - Compare generated vs uploaded test cases using vector similarity
+  - Compare uploaded test cases against requirements using word-level Jaccard similarity + stem matching + synonym dictionary
   - Output: `{ coverage: %, gaps: [{ reqId, reason }], matches: [...] }`
-  - **Verify:** Upload sample data → coverage shows 50%, 2 gaps flagged
+  - **Verify:** Upload sample data → coverage shows ~42%, 7 gaps flagged
 
 ### Phase 4: File Upload & Parsing
 - [x] **7. Build file upload endpoint with parsers**
   - Install: `pdf-parse mammoth marked`
   - Create `POST /api/upload` accepting `.md`, `.pdf`, `.txt`, `.docx`
-  - Parse files → chunk with `RecursiveCharacterTextSplitter` → store in ChromaDB
-  - Save document metadata to SQLite via Prisma
-  - **Verify:** Upload `requirements.md` + `test_cases.md` → files appear in ChromaDB collections
+  - Parse files and store content in SQLite via Prisma
+  - **Verify:** Upload `requirements.md` + `test_cases.md` → documents appear in database
 
 ### Phase 5: Analysis & Report
 - [x] **8. Create analyze endpoint + ReportGeneratorAgent**
-  - `POST /api/analyze` triggers LangGraph run
+  - `POST /api/analyze/:runId` triggers LangGraph run
   - ReportGeneratorAgent renders HTML template with Puppeteer
   - Save PDF to `reports/` directory
   - **Verify:** `POST /api/analyze` → PDF generated in `reports/` folder
@@ -68,12 +67,12 @@ Build a prototype that takes requirements + test cases, generates test coverage 
   - **Verify:** Open browser → PDF downloads with correct content
 
 ### Phase 6: Frontend
-- [x] **10. Create Next.js dashboard**
-  - `npx create-next-app@14 frontend` with App Router
+- [x] **10. Create Vite dashboard**
+  - `npm create vite@latest frontend` with React template
   - Build upload page (`/`) with drag-drop for `.md` files
   - Build dashboard (`/dashboard`) with coverage cards + matrix preview
   - Add PDF download button
-  - **Verify:** Upload files → see 50% coverage → download PDF
+  - **Verify:** Upload files → see coverage → download PDF
 
 ### Phase 7: Observability
 - [x] **11. Integrate Langfuse**
@@ -86,8 +85,8 @@ Build a prototype that takes requirements + test cases, generates test coverage 
 
 ## Done When
 - [x] Upload sample `requirements.md` + `test_cases.md`
-- [x] See coverage: 50% (2/4 requirements covered)
-- [x] Gaps flagged: Req-2, Req-4
+- [x] See coverage percentage (12 requirements, 5 test cases → ~42%)
+- [x] Gaps flagged for uncovered requirements
 - [x] Download PDF report with all sections
 - [x] Langfuse shows agent execution trace
 
@@ -95,7 +94,6 @@ Build a prototype that takes requirements + test cases, generates test coverage 
 
 ## Notes
 - Use `tsx` for TypeScript compilation in backend (`npm i -D tsx`)
-- ChromaDB runs locally on port 8000 — start with `chroma run` before testing
 - Azure APIM key goes in `.env` — never commit it
-- Sample data files are in `architecture_setup.md` §4
-- Frontend proxies API calls to `localhost:3001` via Next.js rewrites
+- Sample data files are in `backend/sample/`
+- Frontend proxies API calls to `localhost:3001` via Vite proxy

@@ -10,6 +10,8 @@ const StateAnnotation = Annotation.Root({
   requirements: Annotation<{ id: string; text: string; priority?: string }[]>,
   testCases: Annotation<{ id: string; text: string; requirementId?: string }[]>,
   generatedTestCases: Annotation<{ id: string; text: string; requirementId?: string }[]>,
+  requirementEmbeddings: Annotation<Record<string, number[]>>,
+  testCaseEmbeddings: Annotation<Record<string, number[]>>,
   matches: Annotation<{ requirementId: string; testCaseId: string; similarity: number }[]>,
   gaps: Annotation<{ requirementId: string; reason: string; suggestedTest?: string }[]>,
   coverage: Annotation<number>,

@@ -1,6 +1,25 @@
 # User Setup Guide
 
-Before running the PDLC Dashboard, you need to configure the following:
+## Quick Start
+
+```bash
+# 1. Clone the repo
+git clone <repo-url>
+cd pdlc-hackathon
+
+# 2. Install all dependencies (workspaces handles backend & frontend)
+npm install
+
+# 3. Set up environment variables
+cp backend/.env.example backend/.env
+# Edit backend/.env with your API keys (see sections below)
+
+# 4. Generate Prisma client and create the SQLite database
+npm run db:push -w backend
+
+# 5. Start the app (runs backend + frontend concurrently)
+npm run dev
+```
 
 ---
 
@@ -20,14 +39,16 @@ Then edit `backend/.env` with your actual credentials.
 
 The system needs an LLM provider to power the AI agents.
 
-### Primary: Azure OpenAI (Hackathon Provided)
+### Primary: Azure APIM (Hackathon Provided)
 
 Edit `backend/.env` and replace the placeholder:
 
 ```env
-AZURE_OPENAI_ENDPOINT=https://apim-foundry-dev-z1hvd.azure-api.net/codex
-AZURE_OPENAI_API_KEY=your_actual_team_key_here
-AZURE_OPENAI_API_VERSION=2025-04-01-preview
+LLM_PROVIDER=azure-apim
+AZURE_APIM_BASE_URL=https://apim-foundry-prod-ltts.azure-api.net
+AZURE_APIM_API_KEY=your_actual_team_key_here
+AZURE_APIM_API_VERSION=2024-12-01-preview
+LLM_MODEL=gpt-5.2
 ```
 
 > **Important:** The hackathon provides a 2M token budget per team. Use this key ONLY for the application, not for IDE autocomplete.
@@ -37,11 +58,9 @@ AZURE_OPENAI_API_VERSION=2025-04-01-preview
 Uncomment one of these in `backend/.env`:
 
 ```env
-# Google Gemini (free tier available)
-# GEMINI_API_KEY=your_gemini_key_here
-
 # OpenAI Direct
 # OPENAI_API_KEY=sk-...
+# OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
 ---
@@ -97,7 +116,7 @@ Files are identified by name:
 - Test-2: Verify dashboard load time is under 2 seconds.
 ```
 
-> **Tip:** The system uses semantic similarity to match requirements to test cases, so exact keyword overlap isn't required. "Google Login" will match "Verify OAuth sign-in works".
+> **Tip:** The system uses embedding-based similarity to match requirements to test cases, so exact keyword overlap isn't required.
 
 ---
 
@@ -107,13 +126,14 @@ All variables go in `backend/.env`:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `AZURE_OPENAI_ENDPOINT` | Yes* | — | Azure OpenAI API endpoint URL |
-| `AZURE_OPENAI_API_KEY` | Yes* | — | Azure OpenAI authentication key |
-| `AZURE_OPENAI_API_VERSION` | No | `2025-04-01-preview` | API version |
-| `GEMINI_API_KEY` | No | — | Google Gemini fallback key |
+| `LLM_PROVIDER` | No | `azure-apim` | LLM provider: `azure-apim` or `openai` |
+| `AZURE_APIM_BASE_URL` | Yes* | — | Azure APIM gateway URL |
+| `AZURE_APIM_API_KEY` | Yes* | — | Azure APIM authentication key |
+| `AZURE_APIM_API_VERSION` | No | `2024-12-01-preview` | API version |
+| `LLM_MODEL` | No | `gpt-5.2` | Model to use (gpt-5-mini, gpt-5.2, gpt-5.4, codex) |
 | `OPENAI_API_KEY` | No | — | OpenAI direct fallback key |
+| `OPENAI_BASE_URL` | No | `https://api.openai.com/v1` | OpenAI API base URL |
 | `DATABASE_URL` | No | `file:./dev.db` | SQLite database path |
-| `CHROMA_HOST` | No | `http://localhost:8000` | ChromaDB endpoint (future use) |
 | `LANGFUSE_PUBLIC_KEY` | No | — | Langfuse public key |
 | `LANGFUSE_SECRET_KEY` | No | — | Langfuse secret key |
 | `LANGFUSE_HOST` | No | `https://cloud.langfuse.com` | Langfuse host URL |
@@ -132,13 +152,12 @@ All variables go in `backend/.env`:
 | npm | ≥ 9 | Comes with Node.js |
 | Git | any | https://git-scm.com |
 
-### ag-kit (Agent Framework)
+### SQLite (Relational Database)
 
-This project uses [ag-kit](https://github.com/vudovn/ag-kit) for agent orchestration. Install it in the project root:
+Zero install — Prisma creates the database file automatically.
 
-```bash
-npx ag-kit install
-```
+**Setup:** Run `npm run db:push -w backend` from the project root to generate the Prisma client and create the SQLite database.
 
-> **SQLite:** Zero install — Prisma creates the database file automatically.
-> **ChromaDB:** Not required for current implementation (similarity is computed locally).
+**Accessing SQLite:**
+- Browse and edit data via Prisma Studio: `npm run db:studio` (opens at `http://localhost:5555`)
+- Or use [DB Browser for SQLite](https://sqlitebrowser.org/) to open `backend/dev.db` directly

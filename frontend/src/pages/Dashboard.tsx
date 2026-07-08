@@ -1,7 +1,5 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef, Suspense } from 'react';
 
 interface Requirement {
   id: string;
@@ -40,14 +38,15 @@ interface AnalysisResult {
 }
 
 function DashboardContent() {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const runId = searchParams.get('runId');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const analysisTriggered = useRef(false);
 
   useEffect(() => {
-    if (!runId) return;
+    if (!runId || analysisTriggered.current) return;
 
     const checkStatus = async () => {
       try {
@@ -55,13 +54,10 @@ function DashboardContent() {
         const data = await res.json();
 
         if (data.status === 'completed' && data.coverage !== null) {
-          const fullRes = await fetch(`/api/analyze/${runId}`, { method: 'POST' });
-          if (fullRes.ok) {
-            const fullData = await fullRes.json();
-            setResult(fullData);
-            setLoading(false);
-          }
+          setResult(data);
+          setLoading(false);
         } else if (data.status === 'uploaded') {
+          analysisTriggered.current = true;
           setAnalyzing(true);
           const fullRes = await fetch(`/api/analyze/${runId}`, { method: 'POST' });
           if (fullRes.ok) {

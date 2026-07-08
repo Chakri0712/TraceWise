@@ -1,4 +1,4 @@
-# Task 10: Create Next.js Dashboard Frontend
+# Task 10: Create Vite Dashboard Frontend
 
 **Status:** Complete
 
@@ -6,9 +6,9 @@
 Built the frontend with two pages: upload page with drag-and-drop file selector, and dashboard page showing analysis results with traceability matrix, coverage stats, gaps, and PDF download.
 
 ## Files Created
-- `frontend/src/app/page.tsx` — Upload page with drag-drop UI
-- `frontend/src/app/dashboard/page.tsx` — Dashboard with results display
-- `frontend/src/app/globals.css` — Full styling (265 lines)
+- `frontend/src/pages/Home.tsx` — Upload page with drag-drop UI
+- `frontend/src/pages/Dashboard.tsx` — Dashboard with results display
+- `frontend/src/index.css` — Full styling (265 lines)
 
 ## Pages
 - `/` — Upload requirements + test case documents
@@ -26,7 +26,7 @@ Built the frontend with two pages: upload page with drag-and-drop file selector,
 
 ## Key Decisions
 - Plain CSS (no Tailwind) for simplicity
-- Next.js rewrites proxy API calls to backend
+- Vite proxy forwards API calls to backend
 - Wrapped dashboard in Suspense for useSearchParams
 
 ## Verification

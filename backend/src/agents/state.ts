@@ -22,6 +22,8 @@ export interface AgentState {
   requirements: Requirement[];
   testCases: TestCase[];
   generatedTestCases: TestCase[];
+  requirementEmbeddings: Record<string, number[]>;
+  testCaseEmbeddings: Record<string, number[]>;
   matches: { requirementId: string; testCaseId: string; similarity: number }[];
   gaps: Gap[];
   coverage: number;

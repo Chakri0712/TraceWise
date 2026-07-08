@@ -1,3 +1,7 @@
+> **ARCHIVED** — This is a pre-implementation design document. Many features referenced here (ChromaDB/Vector DB, `/api/chat`, `/api/traces`, `RecursiveCharacterTextSplitter`, chat interface) were not implemented. See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for the current architecture.
+
+---
+
 # PDLC Hackathon — Architecture & Pre-Implementation Setup
 
 ## System Architecture Overview
@@ -5,7 +9,7 @@
 ```mermaid
 flowchart TD
     subgraph BROWSER["Browser (Client)"]
-        UI["PDLC Dashboard\n(Next.js / React)"]
+        UI["PDLC Dashboard\n(Vite / React)"]
     end
 
     subgraph BACKEND["Backend (Node.js · Express)"]
@@ -82,11 +86,11 @@ AI-Generated Test Cases:
 
 ## Layer-by-Layer Architecture
 
-### 🖥️ Frontend — Next.js (React)
+### 🖥️ Frontend — Vite (React)
 
 | Area | Tech | Responsibility |
 |---|---|---|
-| Framework | **Next.js 14 (App Router)** | SSR, routing, API proxy |
+| Framework | **Vite 6 + React 18** | Fast dev server, routing, API proxy |
 | UI Components | React + Vanilla CSS | Dashboard, upload form, matrix |
 | State | React Context / Zustand | Upload status, analysis results |
 | Data Fetching | `fetch` / SWR | Poll backend for analysis results |
@@ -393,7 +397,7 @@ Create these two files manually for the demo:
 4. Choose Vector DB:
    └── ChromaDB (local)  → pip install chromadb + chroma run  [easiest, needs Python]
    └── Pinecone (cloud)  → sign up + create index              [no Python needed]
-5. SQLite is automatic — Prisma creates dev.db on first run, nothing to install!
+5. SQLite is automatic — run `npm run db:push -w backend` to generate Prisma client and create dev.db
 6. Write .env file (copy template above, fill in your keys)
 7. Prepare sample .md files (requirements.md + test_cases.md)
 ```

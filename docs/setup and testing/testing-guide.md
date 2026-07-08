@@ -14,6 +14,12 @@ Step-by-step guide to test the PDLC Dashboard locally.
 npm install
 ```
 
+4. **Prisma client generated + SQLite database created**:
+
+```bash
+npm run db:push -w backend
+```
+
 ---
 
 ## Step 1: Start the Backend
@@ -53,8 +59,7 @@ npm run dev:frontend
 
 Wait for:
 ```
-▲ Next.js 14.x.x
-  - Local: http://localhost:3000
+VITE v6.x.x  ready in xxx ms
 ```
 
 ---

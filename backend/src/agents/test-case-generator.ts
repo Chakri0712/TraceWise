@@ -1,45 +1,6 @@
 import type { AgentState, TestCase, Gap, Requirement } from './state.js';
 import { getLangfuse } from '../langfuse.js';
-
-const AZURE_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT;
-const AZURE_KEY = process.env.AZURE_OPENAI_API_KEY;
-const AZURE_VERSION = process.env.AZURE_OPENAI_API_VERSION || '2025-04-01-preview';
-
-async function callLLM(prompt: string, traceId?: string, agentName?: string): Promise<string> {
-  if (!AZURE_ENDPOINT || !AZURE_KEY) {
-    throw new Error('LLM not configured');
-  }
-
-  const langfuse = getLangfuse();
-  const trace = langfuse?.trace({ id: traceId, name: agentName || 'TestCaseGenerator' });
-  const span = trace?.span({ name: 'callLLM' });
-
-  const url = `${AZURE_ENDPOINT}/chat/completions?api-version=${AZURE_VERSION}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': AZURE_KEY,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    span?.end({ statusMessage: `Error: ${res.status}` });
-    throw new Error(`LLM API error ${res.status}: ${err}`);
-  }
-
-  const data = await res.json() as { choices: { message: { content: string } }[] };
-  const content = data.choices[0].message.content;
-
-  span?.end({ output: { model: 'gpt-4o', tokens: content.length } });
-  return content;
-}
+import { callLLM, callEmbeddings } from '../llm-client.js';
 
 export async function testCaseGenerator(state: AgentState): Promise<Partial<AgentState>> {
   console.log('[TestCaseGenerator] Generating test cases from requirements...');
@@ -72,7 +33,7 @@ Rules:
   let generatedTestCases: TestCase[];
   try {
     console.log('[TestCaseGenerator] Calling LLM...');
-    const response = await callLLM(prompt, state.traceId, 'TestCaseGenerator');
+    const response = await callLLM(prompt);
     const jsonMatch = response.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       throw new Error('No JSON array found in LLM response');
@@ -136,6 +97,23 @@ export async function traceabilityAgent(state: AgentState): Promise<Partial<Agen
 
   const { requirements, testCases } = state;
 
+  // Compute embeddings for uploaded test cases if not already present
+  let testCaseEmbeddings = { ...state.testCaseEmbeddings };
+  for (const tc of testCases) {
+    if (!testCaseEmbeddings[tc.id]) {
+      try {
+        testCaseEmbeddings[tc.id] = await callEmbeddings(tc.text);
+      } catch (e) {
+        console.warn(`[Traceability] Embedding failed for ${tc.id}:`, e);
+      }
+    }
+  }
+
+  const hasEmbeddings = Object.keys(state.requirementEmbeddings).length > 0
+    && Object.keys(testCaseEmbeddings).length > 0;
+
+  console.log(`[Traceability] Using ${hasEmbeddings ? 'embedding-based' : 'word-level'} similarity`);
+
   // Only match UPLOADED test cases (not generated ones)
   const matches: { requirementId: string; testCaseId: string; similarity: number }[] = [];
   const coveredReqIds = new Set<string>();
@@ -144,9 +122,16 @@ export async function traceabilityAgent(state: AgentState): Promise<Partial<Agen
     let bestMatch: { testCaseId: string; similarity: number } | null = null;
 
     for (const tc of testCases) {
-      const similarity = calculateSimilarity(req.text, tc.text);
+      let similarity: number;
 
-      if (similarity >= 0.2) {
+      if (hasEmbeddings && state.requirementEmbeddings[req.id] && testCaseEmbeddings[tc.id]) {
+        similarity = cosineSimilarity(state.requirementEmbeddings[req.id], testCaseEmbeddings[tc.id]);
+      } else {
+        similarity = calculateSimilarity(req.text, tc.text);
+      }
+
+      const threshold = hasEmbeddings ? 0.6 : 0.2;
+      if (similarity >= threshold) {
         if (!bestMatch || similarity > bestMatch.similarity) {
           bestMatch = { testCaseId: tc.id, similarity };
         }
@@ -183,10 +168,23 @@ export async function traceabilityAgent(state: AgentState): Promise<Partial<Agen
       coverage,
       matchedCount: matches.length,
       gapCount: gaps.length,
+      method: hasEmbeddings ? 'embedding' : 'word-level',
     },
   });
 
-  return { matches, gaps, coverage };
+  return { matches, gaps, coverage, testCaseEmbeddings };
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length || a.length === 0) return 0;
+  let dot = 0, normA = 0, normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  const denom = Math.sqrt(normA) * Math.sqrt(normB);
+  return denom === 0 ? 0 : Math.max(0, dot / denom);
 }
 
 function calculateSimilarity(text1: string, text2: string): number {

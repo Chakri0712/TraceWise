@@ -1,0 +1,4 @@
+- Req-1: Users must log in with email and password.
+- Req-2: Users must log in with Google OAuth.
+- Req-3: Dashboard must load in under 2 seconds.
+- Req-4: Users must be able to export reports as PDF.

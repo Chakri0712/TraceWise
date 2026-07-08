@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Run {
+  id          String   @id @default(cuid())
+  status      String   @default("pending")
+  coverage    Float?
+  gaps        String?
+  createdAt   DateTime @default(now())
+  documents   Document[]
+}
+
+model Document {
+  id        String @id @default(cuid())
+  filename  String
+  type      String
+  content   String
+  runId     String
+  run       Run    @relation(fields: [runId], references: [id])
+}

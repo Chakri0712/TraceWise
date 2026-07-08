@@ -1,0 +1,2 @@
+- Test-1: Verify email/password login succeeds with valid credentials.
+- Test-2: Verify dashboard load time is under 2 seconds.

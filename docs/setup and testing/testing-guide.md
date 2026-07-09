@@ -153,6 +153,12 @@ Four generated test cases should appear (one per requirement).
 
 ## Step 7: Verify Langfuse Traces (Optional)
 
+If you haven't set up Langfuse yet, it provides real-time tracing of AI agent execution (highly recommended):
+1. **Sign Up:** Go to [cloud.langfuse.com](https://cloud.langfuse.com) (Hobby Tier includes 50,000 free observations/month).
+2. **Create Project:** Click "New Project" and name it (e.g., `pdlc-hackathon`).
+3. **Generate Keys:** Go to Settings > API Keys, and click "Create new API keys".
+4. **Configure:** Copy the `pk-lf-...` and `sk-lf-...` keys into your `backend/.env` file under `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY`.
+
 If Langfuse is configured:
 
 1. Open your Langfuse dashboard (https://cloud.langfuse.com)

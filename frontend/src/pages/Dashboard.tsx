@@ -48,6 +48,9 @@ function DashboardContent() {
 
   useEffect(() => {
     if (!runId || analysisTriggered.current) return;
+    
+    // Set synchronously immediately to prevent double-firing in React 18 Strict Mode
+    analysisTriggered.current = true;
 
     const checkStatus = async () => {
       try {
@@ -58,7 +61,6 @@ function DashboardContent() {
           setResult(data);
           setLoading(false);
         } else if (data.status === 'uploaded') {
-          analysisTriggered.current = true;
           setAnalyzing(true);
           const fullRes = await fetch(`/api/analyze/${runId}`, { method: 'POST' });
           if (fullRes.ok) {

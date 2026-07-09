@@ -25,6 +25,7 @@
     "marked": "^15.0.0",
     "multer": "^2.2.0",
     "pdf-parse": "^1.1.1",
+    "pdf2json": "^4.0.3",
     "puppeteer": "^23.0.0"
   },
   "devDependencies": {

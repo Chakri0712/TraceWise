@@ -18,7 +18,7 @@ export async function reportGenerator(state: AgentState): Promise<Partial<AgentS
 
   const html = renderReport(state);
   const dateStr = new Date().toISOString().split('T')[0];
-  const reportPath = join(REPORTS_DIR, `PDLC-Coverage-Report-${dateStr}.pdf`);
+  const reportPath = join(REPORTS_DIR, `${state.runId}.pdf`);
 
   try {
     const puppeteer = await import('puppeteer');

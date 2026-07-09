@@ -223,23 +223,29 @@ export async function traceabilityAgent(state: AgentState): Promise<Partial<Agen
       suggestedTest: `Verify: ${r.text}`,
     }));
 
+  // Reverse pass: detect orphan test cases (test cases with no matching requirement)
+  const matchedTestIds = new Set(matches.map(m => m.testCaseId));
+  const orphanTestCases: TestCase[] = testCases.filter(tc => !matchedTestIds.has(tc.id));
+
   const coverage = requirements.length > 0
     ? (coveredReqIds.size / requirements.length) * 100
     : 0;
 
   console.log(`[Traceability] Coverage: ${coverage.toFixed(0)}% (${coveredReqIds.size}/${requirements.length})`);
   console.log(`[Traceability] Gaps found: ${gaps.length}`);
+  console.log(`[Traceability] Orphan test cases: ${orphanTestCases.length}`);
 
   span?.end({
     output: {
       coverage,
       matchedCount: matches.length,
       gapCount: gaps.length,
+      orphanCount: orphanTestCases.length,
       method: hasEmbeddings ? 'embedding' : 'word-level',
     },
   });
 
-  return { matches, gaps, coverage, testCaseEmbeddings };
+  return { matches, gaps, coverage, testCaseEmbeddings, orphanTestCases };
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {

@@ -35,6 +35,7 @@ interface AnalysisResult {
   generatedTestCases: TestCase[];
   matches: Match[];
   gaps: Gap[];
+  orphanTestCases: TestCase[];
   reportPath?: string;
 }
 
@@ -145,6 +146,10 @@ function DashboardContent() {
             <div className="stat-value" style={{ color: 'var(--color-error)' }}>{result.gaps.length}</div>
             <div className="stat-label">Gaps</div>
           </div>
+          <div className="stat-card">
+            <div className="stat-value" style={{ color: '#e65100' }}>{(result.orphanTestCases || []).length}</div>
+            <div className="stat-label">Orphan Test Cases</div>
+          </div>
         </div>
 
         <div className="card">
@@ -196,17 +201,31 @@ function DashboardContent() {
           </div>
         )}
 
+        {(result.orphanTestCases || []).length > 0 && (
+          <div className="card">
+            <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold" }}>Orphan Test Cases (No Linked Requirement)</h2>
+            <div className="gaps-list">
+              {result.orphanTestCases.map(tc => (
+                <div key={tc.id} className="gap-item" style={{ background: '#fff8e1', borderLeftColor: '#e65100' }}>
+                  <div className="gap-req" style={{ color: '#e65100' }}>{tc.id}</div>
+                  <div>{tc.text}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {(() => {
           const uniqueTypes = ['All', ...Array.from(new Set(result.generatedTestCases.map(tc => tc.type || 'NA')))];
           const filteredTestCases = result.generatedTestCases.filter(tc => selectedType === 'All' || (tc.type || 'NA') === selectedType);
-          
+
           return (
             <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold", margin: 0 }}>AI-Generated Test Cases</h2>
                 <div className="custom-dropdown-container">
-                  <button 
-                    className="dropdown-toggle" 
+                  <button
+                    className="dropdown-toggle"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     Filter by Type: {selectedType}
@@ -217,8 +236,8 @@ function DashboardContent() {
                   {isDropdownOpen && (
                     <ul className="dropdown-menu">
                       {uniqueTypes.map(type => (
-                        <li 
-                          key={type} 
+                        <li
+                          key={type}
                           className={selectedType === type ? 'active' : ''}
                           onClick={() => {
                             setSelectedType(type);

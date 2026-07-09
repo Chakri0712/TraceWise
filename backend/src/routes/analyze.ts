@@ -42,6 +42,7 @@ router.post('/:runId', async (req, res) => {
       testCaseEmbeddings: {},
       matches: [],
       gaps: [],
+      orphanTestCases: [],
       coverage: 0,
     };
 
@@ -59,6 +60,7 @@ router.post('/:runId', async (req, res) => {
           testCases: result.testCases,
           generatedTestCases: result.generatedTestCases,
           matches: result.matches,
+          orphanTestCases: result.orphanTestCases,
           reportPath: result.reportPath,
         }),
       },
@@ -77,6 +79,7 @@ router.post('/:runId', async (req, res) => {
       generatedTestCases: result.generatedTestCases,
       matches: result.matches,
       gaps: result.gaps,
+      orphanTestCases: result.orphanTestCases,
       reportPath: result.reportPath,
     });
   } catch (e) {

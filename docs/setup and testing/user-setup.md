@@ -69,13 +69,29 @@ Uncomment one of these in `backend/.env`:
 
 Langfuse provides real-time tracing of AI agent execution — critical for debugging and demo wow factor.
 
-1. Sign up at https://cloud.langfuse.com (free tier)
-2. Create a project and get your keys
-3. Edit `backend/.env`:
+Langfuse Cloud is completely free to start and highly generous for developers. The Hobby (Free) Tier includes up to 50,000 observations (traces/spans) per month, which is sufficient for development, testing, and small hackathon projects without requiring a credit card.
+
+**Step 1: Sign Up**
+- Go to [cloud.langfuse.com](https://cloud.langfuse.com).
+- Sign up using a Google account, GitHub account, or an email and password.
+
+**Step 2: Create a Project**
+- Log in to access your dashboard.
+- Click the "New Project" button.
+- Name your project (e.g., `pdlc-hackathon` or `TraceWise`) and click Create.
+
+**Step 3: Generate API Keys**
+- Click on **Settings** (the gear icon at the bottom left of the sidebar menu).
+- Navigate to the **API Keys** tab.
+- Click the "Create new API keys" button.
+- Copy the Secret Key immediately, as it will be hidden once the modal closes.
+
+**Step 4: Add the Keys to Your Code**
+Paste the three generated pieces of information into your `backend/.env` file:
 
 ```env
-LANGFUSE_PUBLIC_KEY=pk-lf-your_actual_key
-LANGFUSE_SECRET_KEY=sk-lf-your_actual_key
+LANGFUSE_PUBLIC_KEY=pk-lf-your_actual_key  # Starts with pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-your_actual_key  # Starts with sk-lf-...
 LANGFUSE_HOST=https://cloud.langfuse.com
 ```
 

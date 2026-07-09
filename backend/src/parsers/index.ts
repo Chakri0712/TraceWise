@@ -23,10 +23,21 @@ export async function parseFile(filePath: string, originalName: string): Promise
 }
 
 async function parsePdf(filePath: string): Promise<string> {
-  const pdfParse = (await import('pdf-parse')).default;
-  const buffer = readFileSync(filePath);
-  const data = await pdfParse(buffer);
-  return data.text;
+  try {
+    const pdfParse = (await import('pdf-parse')).default;
+    const buffer = readFileSync(filePath);
+    const data = await pdfParse(buffer);
+    return data.text;
+  } catch (e) {
+    console.warn(`[Parser] pdf-parse failed: ${e}. Falling back to pdf2json...`);
+    const PDFParser = (await import('pdf2json')).default;
+    return new Promise((resolve, reject) => {
+      const pdfParser = new PDFParser(null, 1);
+      pdfParser.on('pdfParser_dataError', (errData: any) => reject(errData.parserError));
+      pdfParser.on('pdfParser_dataReady', () => resolve(pdfParser.getRawTextContent()));
+      pdfParser.loadPDF(filePath);
+    });
+  }
 }
 
 async function parseDocx(filePath: string): Promise<string> {

@@ -1,4 +1,7 @@
 import { useState, useRef } from 'react';
+import aiRobot from '../images/ai-robot.jpg';
+import aiRobotLaptop from '../images/ai-robot-laptop.jpg';
+import aiBotImages from '../images/ai-bot-images.png';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
@@ -87,12 +90,16 @@ export default function Home() {
       <section className="hero">
         <div className="hero-content">
           <div className="hero-eyebrow">
-            AI Across the Product Development Lifecycle
+            Tracewise AI
           </div>
-          <h1>
-            AI-Powered<br />
-            Requirement-to-Test <em>Traceability</em>
-          </h1>
+          <div className="hero-title-container">
+            <img src={aiBotImages} alt="Left Abstract Orb" className="hero-img-left floating-img" />
+            <h1>
+              AI-Powered<br />
+              Requirement-to-Test <em>Traceability</em>
+            </h1>
+            <img src={aiRobotLaptop} alt="Right Abstract Cube" className="hero-img-right floating-img" />
+          </div>
           <p>
             Upload your requirements and test cases. Our 4-agent pipeline
             identifies coverage gaps, generates missing tests, and delivers
@@ -101,7 +108,7 @@ export default function Home() {
           <button className="hero-cta" onClick={scrollToUpload}>
             Get Started
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M8 3v10M3 8l5 5 5-5"/>
+              <path d="M8 3v10M3 8l5 5 5-5" />
             </svg>
           </button>
         </div>
@@ -147,10 +154,10 @@ export default function Home() {
             <div className="feature-card">
               <div className="feature-icon blue">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
                 </svg>
               </div>
               <h3>Requirement Refiner</h3>
@@ -159,8 +166,8 @@ export default function Home() {
             <div className="feature-card">
               <div className="feature-icon green">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 11l3 3L22 4"/>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
               </div>
               <h3>Test Case Generator</h3>
@@ -169,8 +176,8 @@ export default function Home() {
             <div className="feature-card">
               <div className="feature-icon purple">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </div>
               <h3>Traceability Agent</h3>
@@ -179,10 +186,10 @@ export default function Home() {
             <div className="feature-card">
               <div className="feature-icon orange">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <path d="M12 18v-6"/>
-                  <path d="M9 15l3 3 3-3"/>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <path d="M12 18v-6" />
+                  <path d="M9 15l3 3 3-3" />
                 </svg>
               </div>
               <h3>Report Generator</h3>
@@ -219,9 +226,9 @@ export default function Home() {
                 <div className="dropzone-content">
                   <div className="dropzone-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4361ee" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="17 8 12 3 7 8"/>
-                      <line x1="12" y1="3" x2="12" y2="15"/>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                   </div>
                   <p className="dropzone-text">Drag and drop files here, or click to browse</p>

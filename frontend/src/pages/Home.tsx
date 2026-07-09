@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import aiRobot from '../images/ai-robot.jpg';
 import aiRobotLaptop from '../images/ai-robot-laptop.jpg';
 import aiBotImages from '../images/ai-bot-images.png';
 import { useNavigate } from 'react-router-dom';
+import aiLaptop from '../images/ai-laptop.jpg';
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -82,7 +82,7 @@ export default function Home() {
           <span className="navbar-title">Tracewise AI</span>
         </a>
         <div className="navbar-meta">
-          <span><span className="navbar-dot" /> Online</span>
+          <span style={{ color: "#ffffff", fontSize: "15px", fontWeight: "500" }}><span className="navbar-dot" /> Online</span>
         </div>
       </nav>
 
@@ -98,9 +98,9 @@ export default function Home() {
               AI-Powered<br />
               Requirement-to-Test <em>Traceability</em>
             </h1>
-            <img src={aiRobotLaptop} alt="Right Abstract Cube" className="hero-img-right floating-img" />
+            <img src={aiLaptop} alt="Right Abstract Cube" className="hero-img-right floating-img" />
           </div>
-          <p>
+          <p style={{ color: "#ffffff", fontSize: "18px" }}>
             Upload your requirements and test cases. Our 4-agent pipeline
             identifies coverage gaps, generates missing tests, and delivers
             a full traceability report in minutes.
@@ -204,7 +204,7 @@ export default function Home() {
         <div className="section-inner">
           <div className="upload-wrapper">
             <div className="upload-card">
-              <h2>Upload Documents</h2>
+              <h2 style={{ fontSize: "32px" }}>Upload Documents</h2>
               <p className="subtitle">Add your requirements and test case files to begin analysis.</p>
 
               <div

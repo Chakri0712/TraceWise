@@ -45,10 +45,12 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const analysisTriggered = useRef(false);
+  const [selectedType, setSelectedType] = useState('All');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (!runId || analysisTriggered.current) return;
-    
+
     // Set synchronously immediately to prevent double-firing in React 18 Strict Mode
     analysisTriggered.current = true;
 
@@ -126,28 +128,28 @@ function DashboardContent() {
       <main className="container">
         <div className="summary-cards">
           <div className="stat-card">
-            <div className="stat-value" style={{ color: result.coverage >= 50 ? '#2e7d32' : '#c62828' }}>
+            <div className="stat-value" style={{ color: 'var(--color-error)' }}>
               {result.coverage.toFixed(0)}%
             </div>
             <div className="stat-label">Coverage</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{result.requirements.length}</div>
+            <div className="stat-value" style={{ color: '#15ac15' }}>{result.requirements.length}</div>
             <div className="stat-label">Requirements</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value">{result.testCases.length}</div>
+            <div className="stat-value" style={{ color: '#15ac15' }}>{result.testCases.length}</div>
             <div className="stat-label">Test Cases</div>
           </div>
           <div className="stat-card">
-            <div className="stat-value" style={{ color: '#c62828' }}>{result.gaps.length}</div>
+            <div className="stat-value" style={{ color: 'var(--color-error)' }}>{result.gaps.length}</div>
             <div className="stat-label">Gaps</div>
           </div>
         </div>
 
         <div className="card">
           <div className="card-header">
-            <h2>Traceability Matrix</h2>
+            <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold" }}>Traceability Matrix</h2>
             <a href={`/api/report/${runId}`} className="btn btn-primary" target="_blank">
               Download PDF Report
             </a>
@@ -155,9 +157,9 @@ function DashboardContent() {
           <table className="matrix">
             <thead>
               <tr>
-                <th>Requirement</th>
-                <th>Linked Test Case</th>
-                <th>Status</th>
+                <th style={{ whiteSpace: "nowrap" }}>Requirement</th>
+                <th style={{ whiteSpace: "nowrap" }}>Linked Test Case</th>
+                <th style={{ whiteSpace: "nowrap" }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -165,10 +167,10 @@ function DashboardContent() {
                 const match = result.matches.find(m => m.requirementId === req.id);
                 return (
                   <tr key={req.id}>
-                    <td>{req.id}: {req.text}</td>
-                    <td>{match ? match.testCaseId : '—'}</td>
-                    <td className={match ? 'covered' : 'missing'}>
-                      {match ? '✅ Covered' : '❌ MISSING'}
+                    <td style={{ fontWeight: "500" }} ><span style={{ fontWeight: "700" }}>{req.id}</span>: {req.text}</td>
+                    <td style={{ fontWeight: "500" }}>{match ? match.testCaseId : 'NA'}</td>
+                    <td style={{ fontWeight: "500" }} className={match ? 'covered' : 'missing'}>
+                      {match ? '✅ Covered' : '❌ Missing'}
                     </td>
                   </tr>
                 );
@@ -179,14 +181,14 @@ function DashboardContent() {
 
         {result.gaps.length > 0 && (
           <div className="card">
-            <h2>Coverage Gaps</h2>
+            <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold" }}>Coverage Gaps</h2>
             <div className="gaps-list">
               {result.gaps.map(gap => (
                 <div key={gap.requirementId} className="gap-item">
                   <div className="gap-req">{gap.requirementId}</div>
-                  <div>{gap.reason}</div>
+                  <div style={{ fontSize: "16px", fontWeight: "bold" }}>{gap.reason}</div>
                   {gap.suggestedTest && (
-                    <div className="gap-suggested">Suggested: {gap.suggestedTest}</div>
+                    <div className="gap-suggested"><span style={{ color: "#15ac15" }}>Suggested: </span>{gap.suggestedTest}</div>
                   )}
                 </div>
               ))}
@@ -194,29 +196,65 @@ function DashboardContent() {
           </div>
         )}
 
-        <div className="card">
-          <h2>AI-Generated Test Cases</h2>
-          <table className="matrix">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>For Requirement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.generatedTestCases.map(tc => (
-                <tr key={tc.id}>
-                  <td>{tc.id}</td>
-                  <td><strong>{tc.type || '—'}</strong></td>
-                  <td>{tc.text}</td>
-                  <td>{tc.requirementId || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {(() => {
+          const uniqueTypes = ['All', ...Array.from(new Set(result.generatedTestCases.map(tc => tc.type || 'NA')))];
+          const filteredTestCases = result.generatedTestCases.filter(tc => selectedType === 'All' || (tc.type || 'NA') === selectedType);
+          
+          return (
+            <div className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold", margin: 0 }}>AI-Generated Test Cases</h2>
+                <div className="custom-dropdown-container">
+                  <button 
+                    className="dropdown-toggle" 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    Filter by Type: {selectedType}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  {isDropdownOpen && (
+                    <ul className="dropdown-menu">
+                      {uniqueTypes.map(type => (
+                        <li 
+                          key={type} 
+                          className={selectedType === type ? 'active' : ''}
+                          onClick={() => {
+                            setSelectedType(type);
+                            setIsDropdownOpen(false);
+                          }}
+                        >
+                          {type}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+              <table className="matrix">
+                <thead>
+                  <tr>
+                    <th style={{ whiteSpace: "nowrap" }}>ID</th>
+                    <th style={{ whiteSpace: "nowrap" }}>Type</th>
+                    <th style={{ whiteSpace: "nowrap" }}>Description</th>
+                    <th style={{ whiteSpace: "nowrap" }}>For Requirement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTestCases.map(tc => (
+                    <tr key={tc.id}>
+                      <td style={{ whiteSpace: "nowrap", fontWeight: "500" }}>{tc.id}</td>
+                      <td style={{ whiteSpace: "nowrap", fontWeight: "500" }}>{tc.type || 'NA'}</td>
+                      <td style={{ fontWeight: "500" }}>{tc.text}</td>
+                      <td style={{ whiteSpace: "nowrap", fontWeight: "500" }}>{tc.requirementId || 'NA'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </main>
     </div>
   );

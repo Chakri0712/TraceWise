@@ -22,9 +22,28 @@ export async function reportGenerator(state: AgentState): Promise<Partial<AgentS
 
   try {
     const puppeteer = await import('puppeteer');
+    const { existsSync: fsExistsSync } = await import('fs');
+    const chromePaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Users\\guest01\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe'
+    ];
+    let executablePath: string | undefined = undefined;
+    for (const path of chromePaths) {
+      if (fsExistsSync(path)) {
+        executablePath = path;
+        break;
+      }
+    }
     const browser = await puppeteer.default.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+      ],
     });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -152,10 +171,10 @@ function renderReport(state: AgentState): string {
   <h2>AI-Generated Test Cases</h2>
   <table>
     <thead>
-      <tr><th>ID</th><th>Description</th><th>For Requirement</th></tr>
+      <tr><th>ID</th><th>Type</th><th>Description</th><th>For Requirement</th></tr>
     </thead>
     <tbody>
-      ${state.generatedTestCases.map(tc => `<tr><td>${tc.id}</td><td>${tc.text}</td><td>${tc.requirementId || '—'}</td></tr>`).join('\n      ')}
+      ${state.generatedTestCases.map(tc => `<tr><td>${tc.id}</td><td><strong>${tc.type || '—'}</strong></td><td>${tc.text}</td><td>${tc.requirementId || '—'}</td></tr>`).join('\n      ')}
     </tbody>
   </table>
 

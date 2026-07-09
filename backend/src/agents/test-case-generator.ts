@@ -13,21 +13,32 @@ export async function testCaseGenerator(state: AgentState): Promise<Partial<Agen
 
   const reqList = requirements.map(r => `${r.id}: ${r.text}`).join('\n');
 
-  const prompt = `You are a QA engineer. Generate test cases for the following requirements.
+  const prompt = `You are an expert Test Manager. Generate a comprehensive and highly realistic suite of test cases for the following requirements. 
+
+For each requirement, you MUST generate distinct test cases covering different testing levels, ensuring each test case matches the target testing focus of its level:
+- **Unit Testing:** Focus on testing raw logic, single functions, inputs/outputs, parameter constraints, helper methods, data validation rules, regex checks, and password hash computations.
+- **Integration Testing:** Focus on verifying API endpoint requests and responses, database CRUD operations, index lookups, session states, mapping mechanisms, and communication with third-party service gateways (e.g. Google OAuth, Stripe sandbox).
+- **System Testing:** Focus on end-to-end user scenarios simulated in the web browser user interface (UI), complete user navigation flows, multi-filter catalog interactions, shopping cart total recalculations on page, and full checkout sequences.
+- **Acceptance Testing:** Focus on user experience SLAs (e.g., page load under 2 seconds), regulatory compliance requirements (e.g., GDPR data portability/erasure rights), and business transaction verification (e.g. verifying order receipt enqueued after card processing).
+
+Do NOT repeat the requirement text. Make each test case description highly specific, realistic, and segregated according to the target level focus described above.
 
 Requirements:
 ${reqList}
 
 Return ONLY a JSON array with this exact format:
 [
-  { "id": "TC-1", "text": "test case description", "requirementId": "Req-1" },
-  { "id": "TC-2", "text": "test case description", "requirementId": "Req-2" }
+  { "id": "TC-1", "text": "specific Unit level test case description", "requirementId": "Req-1", "type": "Unit" },
+  { "id": "TC-2", "text": "specific Integration level test case description", "requirementId": "Req-1", "type": "Integration" },
+  { "id": "TC-3", "text": "specific System level test case description", "requirementId": "Req-1", "type": "System" },
+  { "id": "TC-4", "text": "specific Acceptance level test case description", "requirementId": "Req-1", "type": "Acceptance" }
 ]
 
 Rules:
-- Generate 1-2 test cases per requirement
-- Each test case must link to a requirement via requirementId
-- Test cases should be specific and verifiable
+- For each requirement, generate distinct test cases covering: 'Unit', 'Integration', 'System', and 'Acceptance' testing levels.
+- Each test case must specify its type: 'Unit', 'Integration', 'System', or 'Acceptance'.
+- Each test case must link to a requirement via requirementId.
+- Test cases should be specific and verifiable.
 - Return ONLY the JSON array, no other text`;
 
   let generatedTestCases: TestCase[];
@@ -53,36 +64,92 @@ function generateTestCasesFallback(requirements: Requirement[]): TestCase[] {
   let tcNum = 1;
 
   for (const req of requirements) {
-    const keywords = req.text.toLowerCase();
-    const isLogin = keywords.includes('login') || keywords.includes('sign in');
-    const isPerformance = keywords.includes('load') || keywords.includes('under') || keywords.includes('seconds');
-    const isExport = keywords.includes('export') || keywords.includes('download') || keywords.includes('pdf');
+    const text = req.text;
+    const keywords = text.toLowerCase();
 
-    if (isLogin) {
-      testCases.push({
-        id: `TC-${tcNum++}`,
-        text: `Verify user can authenticate successfully for: ${req.text}`,
-        requirementId: req.id,
-      });
-    } else if (isPerformance) {
-      testCases.push({
-        id: `TC-${tcNum++}`,
-        text: `Verify performance requirement meets threshold: ${req.text}`,
-        requirementId: req.id,
-      });
-    } else if (isExport) {
-      testCases.push({
-        id: `TC-${tcNum++}`,
-        text: `Verify export functionality works correctly: ${req.text}`,
-        requirementId: req.id,
-      });
-    } else {
-      testCases.push({
-        id: `TC-${tcNum++}`,
-        text: `Verify requirement is implemented correctly: ${req.text}`,
-        requirementId: req.id,
-      });
+    // 1. Unit Testing
+    let unitDesc = `Unit: Validate input validation parameter constraints, data types, and local functions for requirement: "${text}"`;
+    if (keywords.includes('login') || keywords.includes('register') || keywords.includes('auth')) {
+      unitDesc = `Unit: Test sign-in/signup input validators (validate email format regex, password length constraints, and token parser output).`;
+    } else if (keywords.includes('load') || keywords.includes('performance') || keywords.includes('users')) {
+      unitDesc = `Unit: Test connection pool sizing config, counter arithmetic thread-safety, and latency calculation helper utilities.`;
+    } else if (keywords.includes('export') || keywords.includes('download') || keywords.includes('pdf')) {
+      unitDesc = `Unit: Verify PDF report template parser functions inject data correctly and respect boundary limits.`;
+    } else if (keywords.includes('gdpr') || keywords.includes('eu')) {
+      unitDesc = `Unit: Verify PII detection functions correctly mask fields and cascade deletion handles related records in SQLite.`;
+    } else if (keywords.includes('bcrypt') || keywords.includes('password')) {
+      unitDesc = `Unit: Assert password hashing utility uses configured salt rounds and validates matching inputs correctly.`;
+    } else if (keywords.includes('filter') || keywords.includes('catalog')) {
+      unitDesc = `Unit: Test custom filtering filterCatalogItems function returns expected array slice given mock product inputs.`;
+    } else if (keywords.includes('cart') || keywords.includes('quantity')) {
+      unitDesc = `Unit: Verify local cart state modifiers (addItem, changeQty, removeItem) correctly calculate item totals.`;
+    } else if (keywords.includes('checkout') || keywords.includes('pay')) {
+      unitDesc = `Unit: Verify transaction calculation methods compute tax, shipping, and total amounts accurately.`;
     }
+    testCases.push({ id: `TC-${tcNum++}`, text: unitDesc, requirementId: req.id, type: 'Unit' });
+
+    // 2. Integration Testing
+    let intDesc = `Integration: Verify API endpoints, database operations, and service integrations for requirement: "${text}"`;
+    if (keywords.includes('login') || keywords.includes('register') || keywords.includes('auth')) {
+      intDesc = `Integration: Assert register API endpoint creates DB user record, locks unique constraint, and authenticates session.`;
+    } else if (keywords.includes('load') || keywords.includes('performance') || keywords.includes('users')) {
+      intDesc = `Integration: Perform DB index and connection load checks under load to verify catalog retrieval stays within thresholds.`;
+    } else if (keywords.includes('export') || keywords.includes('download') || keywords.includes('pdf')) {
+      intDesc = `Integration: Ensure PDF generation route integrates with reports folder, saves file, and serves download stream.`;
+    } else if (keywords.includes('gdpr') || keywords.includes('eu')) {
+      intDesc = `Integration: Confirm deletion request API successfully triggers data deletion across users, telemetry, and logging tables.`;
+    } else if (keywords.includes('bcrypt') || keywords.includes('password')) {
+      intDesc = `Integration: Confirm user creation API stores password column only as hashed bcrypt format in the database.`;
+    } else if (keywords.includes('filter') || keywords.includes('catalog')) {
+      intDesc = `Integration: Verify catalog retrieval API handles filter query params and utilizes DB search indexing correctly.`;
+    } else if (keywords.includes('cart') || keywords.includes('quantity')) {
+      intDesc = `Integration: Verify cart update API persists changes to database/session and aligns product availability indices.`;
+    } else if (keywords.includes('checkout') || keywords.includes('pay')) {
+      intDesc = `Integration: Verify communication with sandbox payment gateway endpoints and update order status in DB to 'paid'.`;
+    }
+    testCases.push({ id: `TC-${tcNum++}`, text: intDesc, requirementId: req.id, type: 'Integration' });
+
+    // 3. System Testing
+    let sysDesc = `System: Verify complete end-to-end user browser interactions and UI logic for requirement: "${text}"`;
+    if (keywords.includes('login') || keywords.includes('register') || keywords.includes('auth')) {
+      sysDesc = `System: Complete registration and OAuth login in the browser UI, ensuring dashboard redirect and navigation state update.`;
+    } else if (keywords.includes('load') || keywords.includes('performance') || keywords.includes('users')) {
+      sysDesc = `System: Run automated stress tests simulating 1000 users browsing, shopping, and paying simultaneously to verify SLA.`;
+    } else if (keywords.includes('export') || keywords.includes('download') || keywords.includes('pdf')) {
+      sysDesc = `System: Trigger export from dashboard UI, download generated PDF, and verify layout elements and content accuracy.`;
+    } else if (keywords.includes('gdpr') || keywords.includes('eu')) {
+      sysDesc = `System: Verify cookie banner presents GDPR options, and requesting data export/deletion clears browser cookie and DB data.`;
+    } else if (keywords.includes('bcrypt') || keywords.includes('password')) {
+      sysDesc = `System: Perform password update flow in the user portal and confirm login works immediately using new password.`;
+    } else if (keywords.includes('filter') || keywords.includes('catalog')) {
+      sysDesc = `System: Verify multi-filter catalog UI dynamically updates product results matching selected category, price, and rating.`;
+    } else if (keywords.includes('cart') || keywords.includes('quantity')) {
+      sysDesc = `System: Add products to cart in browser, update quantities, remove items, and confirm displayed totals update dynamically.`;
+    } else if (keywords.includes('checkout') || keywords.includes('pay')) {
+      sysDesc = `System: Complete checkout flow using credit card and PayPal options, verify payment state changes, and redirect to confirmation.`;
+    }
+    testCases.push({ id: `TC-${tcNum++}`, text: sysDesc, requirementId: req.id, type: 'System' });
+
+    // 4. Acceptance Testing
+    let accDesc = `Acceptance: Verify business rules, customer SLAs, and regulatory compliance criteria for: "${text}"`;
+    if (keywords.includes('login') || keywords.includes('register') || keywords.includes('auth')) {
+      accDesc = `Acceptance: Verify business criteria: user can register and sign in seamlessly via email or external providers without manual assistance.`;
+    } else if (keywords.includes('load') || keywords.includes('performance') || keywords.includes('users')) {
+      accDesc = `Acceptance: Verify performance SLA: product catalog page load time is under 2 seconds for standard client browser configurations.`;
+    } else if (keywords.includes('export') || keywords.includes('download') || keywords.includes('pdf')) {
+      accDesc = `Acceptance: Verify export criteria: report downloads as a valid PDF file matching corporate layout standards.`;
+    } else if (keywords.includes('gdpr') || keywords.includes('eu')) {
+      accDesc = `Acceptance: Verify compliance criteria: EU users can exercise privacy rights (access, portability, deletion) easily within SLA.`;
+    } else if (keywords.includes('bcrypt') || keywords.includes('password')) {
+      accDesc = `Acceptance: Verify security compliance: passwords must be hashed securely meeting industry standards (bcrypt with salt).`;
+    } else if (keywords.includes('filter') || keywords.includes('catalog')) {
+      accDesc = `Acceptance: Verify user experience criteria: category, price range, and rating filters return expected results as per PM specification.`;
+    } else if (keywords.includes('cart') || keywords.includes('quantity')) {
+      accDesc = `Acceptance: Verify retail business criteria: shoppers can add/modify items in cart and checkout with correct subtotals.`;
+    } else if (keywords.includes('checkout') || keywords.includes('pay')) {
+      accDesc = `Acceptance: Verify payment gateway criteria: order transaction succeeds and confirmation email is sent upon credit card/PayPal completion.`;
+    }
+    testCases.push({ id: `TC-${tcNum++}`, text: accDesc, requirementId: req.id, type: 'Acceptance' });
   }
 
   return testCases;

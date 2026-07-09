@@ -35,7 +35,7 @@ async function main() {
   result.requirements.forEach(r => console.log(`  ${r.id}: ${r.text}`));
 
   console.log(`\nGenerated Test Cases: ${result.generatedTestCases.length}`);
-  result.generatedTestCases.forEach(tc => console.log(`  ${tc.id}: ${tc.text}`));
+  result.generatedTestCases.forEach(tc => console.log(`  ${tc.id} [${tc.type || '—'}]: ${tc.text}`));
 
   console.log(`\nMatches: ${result.matches.length}`);
   result.matches.forEach(m => console.log(`  ${m.requirementId} -> ${m.testCaseId} (${(m.similarity * 100).toFixed(0)}%)`));

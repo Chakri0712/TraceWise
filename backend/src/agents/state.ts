@@ -8,6 +8,7 @@ export interface TestCase {
   id: string;
   text: string;
   requirementId?: string;
+  type?: string;
 }
 
 export interface Gap {

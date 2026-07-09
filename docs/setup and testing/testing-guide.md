@@ -17,7 +17,8 @@ npm install
 4. **Prisma client generated + SQLite database created**:
 
 ```bash
-npm run db:push -w backend
+npm run db:push -w backend  //make sure .env is in backend folder not in src
+
 ```
 
 ---

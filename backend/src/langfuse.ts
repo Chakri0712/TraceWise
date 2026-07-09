@@ -7,8 +7,14 @@ export function getLangfuse(): Langfuse | null {
   const secretKey = process.env.LANGFUSE_SECRET_KEY;
   const host = process.env.LANGFUSE_HOST;
 
-  if (!publicKey || !secretKey || !host) {
-    console.warn('[Langfuse] Not configured — set LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST');
+  if (
+    !publicKey ||
+    !secretKey ||
+    !host ||
+    publicKey.includes('...') ||
+    secretKey.includes('...')
+  ) {
+    console.warn('[Langfuse] Not configured or using placeholder credentials — skipping tracing.');
     return null;
   }
 

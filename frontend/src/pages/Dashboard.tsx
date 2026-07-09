@@ -11,6 +11,7 @@ interface TestCase {
   id: string;
   text: string;
   requirementId?: string;
+  type?: string;
 }
 
 interface Match {
@@ -197,6 +198,7 @@ function DashboardContent() {
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Type</th>
                 <th>Description</th>
                 <th>For Requirement</th>
               </tr>
@@ -205,6 +207,7 @@ function DashboardContent() {
               {result.generatedTestCases.map(tc => (
                 <tr key={tc.id}>
                   <td>{tc.id}</td>
+                  <td><strong>{tc.type || '—'}</strong></td>
                   <td>{tc.text}</td>
                   <td>{tc.requirementId || '—'}</td>
                 </tr>

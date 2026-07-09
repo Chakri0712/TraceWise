@@ -86,16 +86,25 @@ export async function callLLM(prompt: string, options?: LLMOptions): Promise<str
   const defaultTemp = config.model.startsWith('gpt-5') ? 1 : 0.2;
   const temperature = options?.temperature ?? defaultTemp;
 
-  const langfuse = getLangfuse();
-  const trace = langfuse?.trace({ name: `LLM-${config.model}` });
-  const span = trace?.span({ name: 'callLLM', input: { model: config.model, provider: config.provider } });
-
   // Build messages
   const messages: { role: string; content: string }[] = [];
   if (options?.systemPrompt) {
     messages.push({ role: 'system', content: options.systemPrompt });
   }
   messages.push({ role: 'user', content: prompt });
+
+  const langfuse = getLangfuse();
+  const trace = langfuse?.trace({ name: `LLM-${config.model}` });
+  const generation = trace?.generation({
+    name: 'callLLM',
+    model: config.model,
+    modelParameters: {
+      temperature,
+      maxTokens: options?.maxTokens,
+      provider: config.provider
+    },
+    input: messages,
+  });
 
   // Build body — Codex uses a different format
   let body: Record<string, unknown>;
@@ -121,7 +130,7 @@ export async function callLLM(prompt: string, options?: LLMOptions): Promise<str
 
   if (!res.ok) {
     const err = await res.text();
-    span?.end({ statusMessage: `Error: ${res.status} ${err}` });
+    generation?.end({ level: 'ERROR', statusMessage: `Error: ${res.status} ${err}` });
     throw new Error(`LLM API error ${res.status}: ${err}`);
   }
 
@@ -142,14 +151,14 @@ export async function callLLM(prompt: string, options?: LLMOptions): Promise<str
   }
 
   const usage = data.usage as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | undefined;
-  span?.end({
-    output: {
-      model: config.model,
-      provider: config.provider,
-      promptTokens: usage?.prompt_tokens,
-      completionTokens: usage?.completion_tokens,
-      totalTokens: usage?.total_tokens,
-    },
+  
+  generation?.end({
+    output: content,
+    usage: usage ? {
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
+    } : undefined,
   });
 
   return content;
@@ -157,18 +166,35 @@ export async function callLLM(prompt: string, options?: LLMOptions): Promise<str
 
 export async function callEmbeddings(input: string): Promise<number[]> {
   const config = loadConfig();
+  const langfuse = getLangfuse();
+  const trace = langfuse?.trace({ name: `Embeddings` });
+  const modelName = config.provider === 'openai' ? 'text-embedding-3-small' : 'text-embedding-3-large';
+  
+  const generation = trace?.generation({
+    name: 'callEmbeddings',
+    model: modelName,
+    input: input,
+  });
 
   if (config.provider === 'openai') {
     const res = await fetch(`${config.baseUrl}/embeddings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
-      body: JSON.stringify({ model: 'text-embedding-3-small', input }),
+      body: JSON.stringify({ model: modelName, input }),
     });
     if (!res.ok) {
       const err = await res.text();
+      generation?.end({ level: 'ERROR', statusMessage: `Error: ${res.status} ${err}` });
       throw new Error(`Embeddings API error ${res.status}: ${err}`);
     }
-    const data = await res.json() as { data: { embedding: number[] }[] };
+    const data = await res.json() as { data: { embedding: number[] }[], usage?: { prompt_tokens?: number, total_tokens?: number } };
+    
+    generation?.end({
+      usage: data.usage ? {
+        promptTokens: data.usage.prompt_tokens,
+        totalTokens: data.usage.total_tokens,
+      } : undefined
+    });
     return data.data[0].embedding;
   }
 
@@ -189,10 +215,18 @@ export async function callEmbeddings(input: string): Promise<number[]> {
 
   if (!res.ok) {
     const err = await res.text();
+    generation?.end({ level: 'ERROR', statusMessage: `Error: ${res.status} ${err}` });
     throw new Error(`Embeddings API error ${res.status}: ${err}`);
   }
 
-  const data = await res.json() as { data: { embedding: number[] }[] };
+  const data = await res.json() as { data: { embedding: number[] }[], usage?: { prompt_tokens?: number, total_tokens?: number } };
+  
+  generation?.end({
+    usage: data.usage ? {
+      promptTokens: data.usage.prompt_tokens,
+      totalTokens: data.usage.total_tokens,
+    } : undefined
+  });
   return data.data[0].embedding;
 }
 

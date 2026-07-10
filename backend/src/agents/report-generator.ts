@@ -89,6 +89,7 @@ function renderReport(state: AgentState): string {
     .card { flex: 1; background: #f8f9fa; border-radius: 8px; padding: 20px; text-align: center; border: 1px solid #e0e0e0; }
     .card .value { font-size: 36px; font-weight: bold; color: #4361ee; }
     .card .label { font-size: 14px; color: #666; margin-top: 5px; }
+    .orphan { color: #e65100; font-weight: bold; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
     th { background: #f8f9fa; font-weight: 600; }
@@ -124,6 +125,10 @@ function renderReport(state: AgentState): string {
       <div class="value">${state.gaps.length}</div>
       <div class="label">Gaps Flagged</div>
     </div>
+    <div class="card">
+      <div class="value orphan">${(state.orphanTestCases || []).length}</div>
+      <div class="label">Orphan Test Cases</div>
+    </div>
   </div>
 
   <h2>Traceability Matrix</h2>
@@ -156,6 +161,14 @@ function renderReport(state: AgentState): string {
     <div class="req-id">${gap.requirementId}</div>
     <div>${gap.reason}</div>
     ${gap.suggestedTest ? `<div class="suggested">Suggested: ${gap.suggestedTest}</div>` : ''}
+  </div>`).join('')}
+
+  <h2>Orphan Test Cases (No Linked Requirement)</h2>
+  ${(!state.orphanTestCases || state.orphanTestCases.length === 0) ? '<p>No orphan test cases — all test cases map to a requirement.</p>' : ''}
+  ${(state.orphanTestCases || []).map(tc => `
+  <div class="gap-item" style="background: #fff8e1; border-left-color: #e65100;">
+    <div class="req-id orphan">${tc.id}</div>
+    <div>${tc.text}</div>
   </div>`).join('')}
 
   <h2>Existing Test Cases</h2>

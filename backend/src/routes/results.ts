@@ -29,6 +29,7 @@ router.get('/:runId', async (req, res) => {
       testCases: results.testCases || [],
       generatedTestCases: results.generatedTestCases || [],
       matches: results.matches || [],
+      orphanTestCases: results.orphanTestCases || [],
       reportPath: results.reportPath || null,
       createdAt: run.createdAt,
     });

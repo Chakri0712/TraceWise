@@ -78,8 +78,8 @@ function parseRequirementsFallback(content: string): Requirement[] {
   const lines = content.split('\n');
 
   for (const line of lines) {
-    const match = line.match(/(?:Req-\d+|Requirement\s+\d+)[\s:：-]+\s*(.+)/i)
-      || line.match(/^[-*]\s*((?:Req-\d+|Requirement\s+\d+)[\s:：-]+)/i);
+    const match = line.match(/(?:Req-\d+|Requirement\s+\d+)[\s:：]+\s*(.+)/i)
+      || line.match(/^[-*]\s*((?:Req-\d+|Requirement\s+\d+)[\s:：]+)\s*(.+)/i);
 
     if (match) {
       const idMatch = line.match(/(Req-\d+|Requirement\s+\d+)/i);
@@ -97,8 +97,8 @@ function parseTestCasesFallback(content: string): TestCase[] {
   const lines = content.split('\n');
 
   for (const line of lines) {
-    const match = line.match(/(?:Test-\d+|TC-\d+|Test\s+Case\s+\d+)[\s:：-]+\s*(.+)/i)
-      || line.match(/^[-*]\s*((?:Test-\d+|TC-\d+|Test\s+Case\s+\d+)[\s:：-]+)/i);
+    const match = line.match(/(?:Test-\d+|TC-\d+|Test\s+Case\s+\d+)[\s:：]+\s*(.+)/i)
+      || line.match(/^[-*]\s*((?:Test-\d+|TC-\d+|Test\s+Case\s+\d+)[\s:：]+)\s*(.+)/i);
 
     if (match) {
       const idMatch = line.match(/(Test-\d+|TC-\d+|Test\s+Case\s+\d+)/i);

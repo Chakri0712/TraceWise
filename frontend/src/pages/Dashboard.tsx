@@ -208,7 +208,7 @@ function DashboardContent() {
               {result.orphanTestCases.map(tc => (
                 <div key={tc.id} className="gap-item" style={{ background: '#fff8e1', borderLeftColor: '#e65100' }}>
                   <div className="gap-req" style={{ color: '#e65100' }}>{tc.id}</div>
-                  <div>{tc.text}</div>
+                  <div style={{ fontWeight: "600", color: "#000000" }}>{tc.text}</div>
                 </div>
               ))}
             </div>

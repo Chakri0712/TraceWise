@@ -142,15 +142,15 @@ function renderReport(state: AgentState): string {
     </thead>
     <tbody>
       ${state.requirements.map(req => {
-        const match = state.matches.find(m => m.requirementId === req.id);
-        const status = match ? '✅ Covered' : '❌ MISSING';
-        const statusClass = match ? 'covered' : 'missing';
-        return `<tr>
+    const match = state.matches.find(m => m.requirementId === req.id);
+    const status = match ? '✅ Covered' : '❌ MISSING';
+    const statusClass = match ? 'covered' : 'missing';
+    return `<tr>
           <td>${req.id}: ${req.text}</td>
           <td>${match ? match.testCaseId : '—'}</td>
           <td class="${statusClass}">${status}</td>
         </tr>`;
-      }).join('\n      ')}
+  }).join('\n      ')}
     </tbody>
   </table>
 

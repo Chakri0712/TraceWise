@@ -151,13 +151,13 @@ function DashboardContent() {
             <div className="stat-label">Orphan Test Cases</div>
           </div>
         </div>
-
+        <a style={{ marginBottom: "25px" }} href={`/api/report/${runId}`} className="btn btn-primary" target="_blank">
+          Download PDF Report
+        </a>
         <div className="card">
           <div className="card-header">
             <h2 style={{ whiteSpace: "nowrap", fontSize: "24px", fontWeight: "bold" }}>Traceability Matrix</h2>
-            <a href={`/api/report/${runId}`} className="btn btn-primary" target="_blank">
-              Download PDF Report
-            </a>
+
           </div>
           <table className="matrix">
             <thead>

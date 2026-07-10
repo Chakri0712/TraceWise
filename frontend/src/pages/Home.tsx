@@ -81,9 +81,9 @@ export default function Home() {
           <div className="navbar-logo">T</div>
           <span className="navbar-title">Tracewise AI</span>
         </a>
-        <div className="navbar-meta">
+        {/* <div className="navbar-meta">
           <span style={{ color: "#ffffff", fontSize: "15px", fontWeight: "500" }}><span className="navbar-dot" /> Online</span>
-        </div>
+        </div> */}
       </nav>
 
       {/* Hero */}

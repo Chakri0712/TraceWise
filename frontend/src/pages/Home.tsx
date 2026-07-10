@@ -90,7 +90,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-content">
           <div className="hero-eyebrow">
-            Tracewise AI
+            <span>Tracewise AI</span>
           </div>
           <div className="hero-title-container">
             <img src={aiBotImages} alt="Left Abstract Orb" className="hero-img-left floating-img" />
